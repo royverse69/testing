@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thank You - Calverse</title>
+    
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Define custom styles and theme */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f0f0f;
+            color: #f0f0f0;
+            /* Subtle background pattern for a bit of texture */
+            background-image: radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        
+        /* Custom accent color */
+        .text-accent { color: #ffe600; }
+        .bg-accent { background-color: #ffe600; }
+        .border-accent { border-color: #ffe600; }
+
+        /* Card styling with a glowing border effect on hover */
+        .content-card {
+            position: relative;
+            background-color: rgba(22, 22, 22, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            overflow: hidden; /* Needed for the pseudo-element */
+            transition: border-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        }
+        
+        /* Glowing border animation on hover */
+        .content-card:hover {
+            border-color: rgba(255, 230, 0, 0.3);
+            box-shadow: 0 8px 40px 0 rgba(255, 230, 0, 0.1);
+        }
+
+        /* Styling for the motivational quote */
+        .quote {
+            font-style: italic;
+            color: #a0a0a0;
+        }
+
+        /* Styling for highlighted text within paragraphs */
+        strong {
+            color: #ffe600;
+            font-weight: 600;
+        }
+        
+        /* Enhanced reward section with a subtle glow */
+        .reward-section {
+            background-color: rgba(30, 30, 30, 0.7);
+            border: 1px solid rgba(255, 230, 0, 0.2);
+            box-shadow: 0 0 15px 5px rgba(255, 230, 0, 0.05);
+        }
+        
+        /* Animation utility classes for fade-in effect */
+        .reveal {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+        
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Main container for centering content -->
+    <div class="flex flex-col items-center justify-center min-h-screen p-4 sm:p-6 lg:p-8">
+
+        <div class="content-card w-full max-w-2xl rounded-2xl p-8 md:p-12 space-y-8">
+
+            <!-- Hero Section (Center Aligned) -->
+            <header class="reveal text-center space-y-4">
+                <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight">
+                    Thank You, <span class="text-accent">Calverse</span> Community! 🖤
+                </h1>
+                <p class="text-lg text-gray-300">
+                    We’re so grateful for your precious time and support.
+                </p>
+                <p class="quote text-sm pt-2">
+                    “The only bad workout is the one that didn’t happen.”
+                </p>
+            </header>
+
+            <!-- Divider -->
+            <hr class="reveal border-gray-700/50">
+
+            <!-- Info Section (Left Aligned for Readability) -->
+            <section class="reveal text-left space-y-4 text-gray-300" style="line-height: 1.7;">
+                <p>
+                    Thank you for being one of the first people to test Calverse. The app is now in its <strong>testing phase</strong>, and your help is exactly what we need.
+                </p>
+                <p>
+                    While most features are working well, some might still have a few bugs. If you notice anything that isn't working right, or if you have any <strong>suggestions</strong> or <strong>ideas</strong> for a feature you'd love to see, please let us know!
+                </p>
+            </section>
+            
+            <!-- Contact Section (Center Aligned) -->
+            <section class="reveal text-center text-gray-300">
+                <p>You can freely message us with your thoughts via Instagram:</p>
+                <a href="https://instagram.com/yourhandle" target="_blank" rel="noopener noreferrer" 
+                   class="text-accent font-bold text-lg inline-block my-2 hover:underline underline-offset-4">
+                    @yourhandle
+                </a>
+            </section>
+
+            <!-- Appreciation Section (Enhanced and Centered) -->
+            <section class="reveal reward-section rounded-lg p-4 text-center">
+                <p class="text-gray-200 text-lg">
+                    🎁 As a token of our appreciation, you'll receive <strong>1 month of free premium access</strong> on your registered account.
+                </p>
+            </section>
+
+            <!-- CTA Section (Center Aligned) -->
+            <div class="reveal text-center pt-4">
+                <a href="#" 
+                   class="inline-block bg-accent text-black font-bold py-3 px-10 rounded-full text-lg 
+                          transform transition-transform duration-300 ease-in-out 
+                          hover:scale-105 hover:shadow-lg hover:shadow-yellow-500/20">
+                    Continue to Website
+                </a>
+            </div>
+
+        </div>
+
+        <!-- Footer (Center Aligned) -->
+        <footer class="reveal mt-8 text-center">
+            <p class="text-sm" style="color: #999;">
+                Made with ❤️ by Team Calverse
+            </p>
+        </footer>
+
+    </div>
+
+    <script>
+        // Simple Intersection Observer for revealing elements on scroll
+        document.addEventListener("DOMContentLoaded", () => {
+            const revealElements = document.querySelectorAll('.reveal');
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach((entry, index) => {
+                    if (entry.isIntersecting) {
+                        // Add a delay based on the element's index to stagger the animation
+                        setTimeout(() => {
+                            entry.target.classList.add('visible');
+                        }, index * 100); // 100ms delay between each element
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, {
+                threshold: 0.1 // Trigger when 10% of the element is visible
+            });
+
+            revealElements.forEach(el => {
+                observer.observe(el);
+            });
+        });
+    </script>
+
+</body>
+</html>

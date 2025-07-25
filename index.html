@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Your Account</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Custom styles for the page */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .form-container {
+            max-width: 450px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+
+    <div class="form-container bg-white p-8 sm:p-10 rounded-xl shadow-lg border border-gray-200 m-4">
+        <!-- Header -->
+        <header class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800">Login to Your Account</h1>
+            <p class="text-gray-500 mt-2">Welcome back! Please enter your details.</p>
+        </header>
+
+        <!-- Login Form -->
+        <form id="login-form" class="space-y-6">
+            <!-- Email Field -->
+            <div>
+                <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                <input type="email" id="email" name="email" required
+                    class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300"
+                    placeholder="you@example.com">
+            </div>
+
+            <!-- Password Field -->
+            <div>
+                <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                <input type="password" id="password" name="password" required
+                    class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300"
+                    placeholder="••••••••">
+            </div>
+
+            <!-- Login Button -->
+            <div>
+                <button type="submit"
+                    class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-300 ease-in-out transform hover:-translate-y-0.5">
+                    Login
+                </button>
+            </div>
+        </form>
+
+        <!-- Divider -->
+        <div class="my-6 flex items-center">
+            <div class="flex-grow border-t border-gray-300"></div>
+            <span class="flex-shrink mx-4 text-gray-500">OR</span>
+            <div class="flex-grow border-t border-gray-300"></div>
+        </div>
+
+        <!-- Google Sign-In Button -->
+        <button id="google-signin-btn"
+            class="w-full flex items-center justify-center bg-white border border-gray-300 text-gray-700 font-medium py-3 px-4 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-300">
+            <svg class="w-5 h-5 mr-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48px" height="48px"><path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24s8.955,20,20,20s20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"></path><path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"></path><path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.22,0-9.655-3.356-11.127-7.962l-6.522,5.025C9.505,39.556,16.227,44,24,44z"></path><path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.574l6.19,5.238C42.021,35.596,44,30.138,44,24C44,22.659,43.862,21.35,43.611,20.083z"></path></svg>
+            Sign in with Google
+        </button>
+
+        <!-- Alert/Validation Message Box -->
+        <div id="alert-box" class="hidden mt-6 p-4 rounded-lg text-sm"></div>
+
+        <!-- Link to Register -->
+        <div class="mt-8 text-center">
+            <p class="text-sm text-gray-600">
+                New here?
+                <a href="register.html" class="font-medium text-blue-600 hover:text-blue-500">Register now</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script type="module">
+        // Import functions from the Firebase SDKs
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { 
+            getAuth, 
+            signInWithEmailAndPassword,
+            GoogleAuthProvider,
+            signInWithPopup,
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAS1fvvgtRXx9wLwmJec-2tkBX2PlnAuN0",
+            authDomain: "calversev2.firebaseapp.com",
+            projectId: "calversev2",
+            storageBucket: "calversev2.appspot.com",
+            messagingSenderId: "794294005093",
+            appId: "1:794294005093:web:6104521d5e4a2de812858c",
+            measurementId: "G-PTT8TN4JG0"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        // DOM Elements
+        const loginForm = document.getElementById('login-form');
+        const googleSignInBtn = document.getElementById('google-signin-btn');
+        const alertBox = document.getElementById('alert-box');
+
+        /**
+         * Displays an alert message to the user.
+         * @param {string} message - The message to display.
+         * @param {string} type - 'success' or 'error'.
+         */
+        const showAlert = (message, type = 'error') => {
+            alertBox.textContent = message;
+            alertBox.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'bg-green-100', 'text-green-700');
+            if (type === 'error') {
+                alertBox.classList.add('bg-red-100', 'text-red-700');
+            } else {
+                alertBox.classList.add('bg-green-100', 'text-green-700');
+            }
+        };
+        
+        /**
+         * Handles successful login by saving UID and redirecting.
+         * @param {object} user - The user object from Firebase Auth.
+         */
+        const handleSuccessfulLogin = (user) => {
+            // Store UID in localStorage for session management
+            localStorage.setItem('userUid', user.uid);
+            console.log('Login successful, UID stored:', user.uid);
+
+            showAlert('Login successful! Redirecting to dashboard...', 'success');
+            setTimeout(() => {
+                window.location.href = 'dashboard.html'; // Redirect to the dashboard
+            }, 2000);
+        };
+
+
+        /**
+         * Handles the email/password login form submission.
+         */
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = loginForm.email.value;
+            const password = loginForm.password.value;
+            alertBox.classList.add('hidden');
+
+            try {
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                handleSuccessfulLogin(userCredential.user);
+            } catch (error) {
+                console.error('Login Error:', error.code, error.message);
+                let friendlyMessage = "An unexpected error occurred. Please try again.";
+                switch (error.code) {
+                    case 'auth/user-not-found':
+                    case 'auth/invalid-email':
+                        friendlyMessage = 'User not found with this email. Redirecting to register...';
+                        showAlert(friendlyMessage, 'error');
+                        setTimeout(() => {
+                            window.location.href = 'register.html';
+                        }, 2500);
+                        return; // Stop further execution
+                    case 'auth/wrong-password':
+                    case 'auth/invalid-credential':
+                        friendlyMessage = 'Invalid credentials. Please check your email and password.';
+                        break;
+                }
+                showAlert(friendlyMessage, 'error');
+            }
+        });
+
+        /**
+         * Handles the Google Sign-In button click.
+         */
+        googleSignInBtn.addEventListener('click', async () => {
+            const provider = new GoogleAuthProvider();
+            try {
+                const result = await signInWithPopup(auth, provider);
+                // The same handler can be used for Google sign-in success
+                handleSuccessfulLogin(result.user);
+            } catch (error) {
+                console.error("Google Sign-In Error:", error);
+                showAlert(`Google Sign-In failed: ${error.message}`, 'error');
+            }
+        });
+
+    </script>
+</body>
+</html>

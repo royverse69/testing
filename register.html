@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Create Your Account</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .form-container { max-width: 500px; width: 100%; }
+        .modal-backdrop {
+            background-color: rgba(0, 0, 0, 0.5);
+            transition: opacity 0.3s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+
+    <div id="main-content">
+        <div class="form-container bg-white p-8 sm:p-10 rounded-xl shadow-lg border border-gray-200 m-4">
+            <header class="text-center mb-8">
+                <h1 class="text-3xl font-bold text-gray-800">Create Your Account</h1>
+                <p class="text-gray-500 mt-2">Please fill in the details below to get started.</p>
+            </header>
+
+            <!-- Registration Form -->
+            <form id="register-form" class="space-y-5">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div>
+                        <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                        <input type="text" id="name" name="name" required class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label for="dob" class="block text-sm font-medium text-gray-700 mb-1">Date of Birth</label>
+                        <input type="date" id="dob" name="dob" required class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+                <div>
+                    <label for="gender" class="block text-sm font-medium text-gray-700 mb-1">Gender</label>
+                    <select id="gender" name="gender" required class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="" disabled selected>Select your gender</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                    <input type="email" id="email" name="email" required class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div>
+                        <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                        <input type="password" id="password" name="password" required minlength="6" class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label for="confirm-password" class="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
+                        <input type="password" id="confirm-password" name="confirm-password" required minlength="6" class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+                <div>
+                    <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-300">
+                        Register
+                    </button>
+                </div>
+            </form>
+
+            <div class="my-6 flex items-center">
+                <div class="flex-grow border-t border-gray-300"></div>
+                <span class="flex-shrink mx-4 text-gray-500">OR</span>
+                <div class="flex-grow border-t border-gray-300"></div>
+            </div>
+
+            <button id="google-signin-btn" class="w-full flex items-center justify-center bg-white border border-gray-300 text-gray-700 font-medium py-3 px-4 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-300">
+                <svg class="w-5 h-5 mr-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24s8.955,20,20,20s20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"></path><path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"></path><path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.22,0-9.655-3.356-11.127-7.962l-6.522,5.025C9.505,39.556,16.227,44,24,44z"></path><path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.574l6.19,5.238C42.021,35.596,44,30.138,44,24C44,22.659,43.862,21.35,43.611,20.083z"></path></svg>
+                Sign up with Google
+            </button>
+
+            <div id="alert-box" class="hidden mt-6 p-4 rounded-lg text-sm"></div>
+
+            <div class="mt-8 text-center">
+                <p class="text-sm text-gray-600">Already have an account? <a href="index.html" class="font-medium text-blue-600 hover:text-blue-500">Log in here</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for additional Google Sign-In details -->
+    <div id="google-details-modal" class="fixed inset-0 z-50 flex items-center justify-center modal-backdrop hidden">
+        <div class="bg-white p-8 rounded-xl shadow-2xl m-4 w-full max-w-md">
+            <h2 class="text-2xl font-bold text-gray-800 text-center">One Last Step</h2>
+            <p class="text-center text-gray-500 mt-2 mb-6">We just need a few more details to complete your profile.</p>
+            <form id="google-details-form" class="space-y-5">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Email Address</label>
+                    <p id="google-email-display" class="mt-1 text-gray-800 font-semibold"></p>
+                </div>
+                 <div>
+                    <label for="google-name" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                    <input type="text" id="google-name" required class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label for="google-dob" class="block text-sm font-medium text-gray-700 mb-1">Date of Birth</label>
+                    <input type="date" id="google-dob" required class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label for="google-gender" class="block text-sm font-medium text-gray-700 mb-1">Gender</label>
+                    <select id="google-gender" required class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="" disabled selected>Select your gender</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div>
+                    <button type="submit" class="w-full mt-2 bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Complete Registration</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAS1fvvgtRXx9wLwmJec-2tkBX2PlnAuN0",
+            authDomain: "calversev2.firebaseapp.com",
+            projectId: "calversev2",
+            storageBucket: "calversev2.appspot.com",
+            messagingSenderId: "794294005093",
+            appId: "1:794294005093:web:6104521d5e4a2de812858c",
+            measurementId: "G-PTT8TN4JG0"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // --- DOM Elements ---
+        const registerForm = document.getElementById('register-form');
+        const googleSignInBtn = document.getElementById('google-signin-btn');
+        const alertBox = document.getElementById('alert-box');
+        const googleDetailsModal = document.getElementById('google-details-modal');
+        const googleDetailsForm = document.getElementById('google-details-form');
+        let googleUserHolder = null; // To hold the user object from Google sign-in
+
+        // --- Utility Functions ---
+        const showAlert = (message, type = 'error') => {
+            alertBox.textContent = message;
+            alertBox.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'bg-green-100', 'text-green-700');
+            // FIX: Correctly add classes based on type
+            if (type === 'error') {
+                alertBox.classList.add('bg-red-100', 'text-red-700');
+            } else {
+                alertBox.classList.add('bg-green-100', 'text-green-700');
+            }
+        };
+
+        const calculateAge = (dobString) => {
+            if (!dobString) return null;
+            const today = new Date();
+            const birthDate = new Date(dobString);
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const m = today.getMonth() - birthDate.getMonth();
+            if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+                age--;
+            }
+            return age;
+        };
+
+        const saveUserToFirestore = async (user, additionalData) => {
+            try {
+                const userDocRef = doc(db, 'users', user.uid);
+                const userData = {
+                    uid: user.uid,
+                    email: user.email,
+                    ...additionalData,
+                    createdAt: serverTimestamp()
+                };
+                await setDoc(userDocRef, userData);
+                console.log("User data saved to Firestore successfully.");
+            } catch (error) {
+                console.error("Error saving user to Firestore: ", error);
+                showAlert(`Error saving user data: ${error.message}`, 'error');
+            }
+        };
+        
+        const redirectToLogin = () => {
+             setTimeout(() => { window.location.href = 'index.html'; }, 2000);
+        }
+
+        // --- Event Listeners ---
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            alertBox.classList.add('hidden');
+
+            const email = registerForm.email.value;
+            const password = registerForm.password.value;
+            const confirmPassword = registerForm['confirm-password'].value;
+            const name = registerForm.name.value;
+            const dob = registerForm.dob.value;
+            const gender = registerForm.gender.value;
+
+            if (password !== confirmPassword) {
+                return showAlert("Passwords do not match.", 'error');
+            }
+
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+                
+                const additionalData = {
+                    name,
+                    dob,
+                    gender,
+                    age: calculateAge(dob)
+                };
+
+                await saveUserToFirestore(user, additionalData);
+                showAlert('Registration successful! Redirecting to login...', 'success');
+                redirectToLogin();
+
+            } catch (error) {
+                let friendlyMessage = "An unexpected error occurred.";
+                if (error.code === 'auth/email-already-in-use') {
+                    friendlyMessage = 'This email is already in use. Please log in.';
+                } else if (error.code === 'auth/weak-password') {
+                    friendlyMessage = 'Password should be at least 6 characters.';
+                }
+                showAlert(friendlyMessage, 'error');
+            }
+        });
+
+        googleSignInBtn.addEventListener('click', async () => {
+            const provider = new GoogleAuthProvider();
+            try {
+                const result = await signInWithPopup(auth, provider);
+                const user = result.user;
+
+                // Check if user already exists in Firestore
+                const userDocRef = doc(db, 'users', user.uid);
+                const docSnap = await getDoc(userDocRef);
+
+                if (docSnap.exists()) {
+                    // User exists, log them in and redirect
+                    console.log("Existing Google user. Logging in.");
+                    localStorage.setItem('userUid', user.uid);
+                    showAlert('Welcome back! Redirecting...', 'success');
+                    setTimeout(() => { window.location.href = 'dashboard.html'; }, 2000);
+                } else {
+                    // New Google user, ask for more details
+                    console.log("New Google user. Asking for more details.");
+                    googleUserHolder = user; // Store user object temporarily
+                    document.getElementById('google-email-display').textContent = user.email;
+                    // Pre-fill name if available from Google profile
+                    if (user.displayName) {
+                        document.getElementById('google-name').value = user.displayName;
+                    }
+                    googleDetailsModal.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error("Google Sign-In Error:", error);
+                showAlert(`Google Sign-In failed: ${error.message}`, 'error');
+            }
+        });
+
+        googleDetailsForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!googleUserHolder) {
+                return showAlert('Session expired. Please try signing in with Google again.', 'error');
+            }
+            
+            const additionalData = {
+                name: document.getElementById('google-name').value,
+                dob: document.getElementById('google-dob').value,
+                gender: document.getElementById('google-gender').value,
+                age: calculateAge(document.getElementById('google-dob').value)
+            };
+
+            await saveUserToFirestore(googleUserHolder, additionalData);
+            googleDetailsModal.classList.add('hidden');
+            showAlert('Profile complete! Redirecting to dashboard...', 'success');
+            localStorage.setItem('userUid', googleUserHolder.uid);
+            setTimeout(() => { window.location.href = 'dashboard.html'; }, 2000);
+        });
+
+    </script>
+</body>
+</html>

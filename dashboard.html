@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Your Health Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+
+
+    <!-- Main Styles -->
+    <style>
+        :root {
+            --background-dark: #0A0A0A;
+            --card-bg-dark: #18181B;
+            --border-color-dark: #27272A;
+            --text-primary-dark: #FFFFFF;
+            --text-secondary-dark: #A1A1AA;
+            --primary: #FACC15; /* Yellow-400 */
+            --primary-hover: #EAB308; /* Yellow-500 */
+            --text-on-primary: #000000;
+        }
+        
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            background-color: var(--background-dark);
+            color: var(--text-primary-dark);
+            position: relative; /* Needed for the pseudo-element */
+        }
+        
+        body[data-no-scroll="true"] {
+            overflow: hidden;
+        }
+
+        /* Black and Grey Background Image with Overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-size: cover;
+            background-position: center;
+            z-index: -1;
+            filter: grayscale(100%); /* Convert image to black and grey */
+            
+            /* Mobile background with grey overlay effect */
+            background-image: linear-gradient(rgba(10, 10, 10, 0.7), rgba(10, 10, 10, 0.7)), url('https://calverse.netlify.app/bgimg.png');
+            opacity: 0.6; /* Opacity set to 60% */
+        }
+
+        /* Desktop background */
+        @media (min-width: 768px) {
+            body::before {
+                background-image: url('https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=2070&auto=format&fit=crop');
+                opacity: 0.1; /* More subtle effect for desktop */
+            }
+        }
+
+        /* Glassmorphism Card Style */
+        .card {
+            background-color: rgba(24, 24, 27, 0.6); /* Semi-transparent background */
+            backdrop-filter: blur(15px) saturate(150%);
+            -webkit-backdrop-filter: blur(15px) saturate(150%);
+            border: 1px solid rgba(255, 255, 255, 0.1); /* Subtle border for the glass edge */
+            border-radius: 0.75rem;
+            transition: all 0.3s ease-in-out;
+        }
+        
+        .header-glass {
+            background-color: rgba(10, 10, 10, 0.75);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border-bottom: 1px solid var(--border-color-dark);
+        }
+
+        .text-main { color: var(--text-primary-dark); }
+        .text-sub { color: var(--text-secondary-dark); }
+        
+        .page { display: none; }
+        .page.active { display: block; }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: var(--text-on-primary);
+            font-weight: bold;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px -5px rgba(250, 204, 21, 0.4);
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px -5px rgba(250, 204, 21, 0.6); background: var(--primary-hover); }
+        .btn-primary:disabled { background: #3f3f46; color: #a1a1aa; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--background-dark); }
+        ::-webkit-scrollbar-thumb { background: #4A5568; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #718096; }
+
+        .card-clickable { cursor: pointer; }
+        .card-clickable:hover { 
+            transform: translateY(-2px); 
+            border-color: var(--primary);
+        }
+        .modal-backdrop { 
+            background-color: rgba(10, 10, 10, 0.8); 
+            backdrop-filter: blur(10px);
+        }
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--text-primary-dark);
+            border: 1px solid var(--border-color-dark);
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+        }
+        .btn-secondary:hover { background-color: var(--border-color-dark); }
+        .progress-bar-bg { background-color: var(--border-color-dark); border-radius: 9999px; }
+        .progress-bar-fill { height: 100%; border-radius: 9999px; transition: width 0.5s ease-in-out; background: linear-gradient(to right, #ef4444, #facc15); }
+        
+        .nav-item {
+            display: flex; align-items: center; gap: 1rem; padding: 0.75rem;
+            border-radius: 0.5rem; color: var(--text-secondary-dark); font-weight: 600;
+            transition: all 0.2s ease-in-out;
+        }
+        .nav-item:hover, .nav-item.active {
+            background-color: rgba(250, 204, 21, 0.1); color: var(--primary);
+        }
+        .nav-item-mobile { color: var(--text-secondary-dark); transition: color 0.2s ease-in-out; }
+        .nav-item-mobile.active, .nav-item-mobile:hover { color: var(--primary); }
+        .nav-item-mobile.active svg { stroke: var(--primary); }
+
+        /* --- Input Styling Fixes --- */
+        input, select, textarea {
+            background-color: #000000; /* Pure black background */
+            border: 1px solid #4B5563; /* Thinner, lighter gray border */
+            border-radius: 0.5rem; /* Standard rounded corners */
+            padding: 1rem 1.25rem;
+            color: var(--text-primary-dark);
+            transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
+        }
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--primary); 
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(250, 204, 21, 0.2);
+        }
+        /* Placeholder styling for better visibility */
+        ::placeholder {
+            color: var(--text-secondary-dark);
+            opacity: 0.6;
+        }
+
+        #date-picker-wrapper input[type="date"]::-webkit-calendar-picker-indicator {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            opacity: 0; cursor: pointer;
+        }
+
+        .section-content { display: none; animation: fadeIn 0.5s; }
+        .section-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
+        /* Custom Calendar Styles */
+        .calendar-day { transition: background-color: 0.2s; }
+        .calendar-day.other-month { color: var(--text-secondary-dark); }
+        .calendar-day:not(.other-month):hover { background-color: var(--border-color-dark); }
+        .calendar-day.selected { background-color: var(--primary); color: var(--text-on-primary); font-weight: bold; }
+        .calendar-day.today { border: 1px solid var(--primary); }
+
+        /* Mobile Screen Adjustments */
+        @media (max-width: 767px) {
+            header .flex.items-center.justify-between {
+                height: 4rem; /* Reduced from 5rem (h-20) */
+            }
+            #main-welcome-message {
+                font-size: 1.875rem; /* Reduced from 2.25rem */
+            }
+            .summary-card-value {
+                font-size: 1.5rem; /* Reduced from 1.875rem */
+            }
+            main {
+                padding: 1rem;
+            }
+            .grid {
+                gap: 0.75rem; /* Reduced gap between grid items */
+            }
+        }
+
+        /* Goal Completion Animation */
+        .progress-bar-fill.completed {
+            animation: pulse-bg 2s infinite;
+        }
+
+        @keyframes pulse-bg {
+            0% { background: linear-gradient(to right, #a855f7, #facc15); }
+            50% { background: linear-gradient(to right, #facc15, #4ade80); }
+            100% { background: linear-gradient(to right, #a855f7, #facc15); }
+        }
+
+        #goal-completed-container {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        /* Splash Animation */
+        .splash {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            background-color: rgba(59, 130, 246, 0.5);
+            border-radius: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            opacity: 0;
+            pointer-events: none;
+        }
+        .splash.animate {
+            animation: splash-effect 0.5s ease-out;
+        }
+        @keyframes splash-effect {
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(10); opacity: 0; }
+        }
+
+        /* Tab styling */
+        .tab-button {
+            transition: all 0.2s ease-in-out;
+            border-bottom: 2px solid transparent;
+        }
+        .tab-button.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Health Calculator Styles */
+        .accordion-header {
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            font-weight: 600;
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease-in-out, padding 0.4s ease-in-out;
+            padding: 0 1.5rem;
+        }
+        .accordion-item.open .accordion-content {
+            max-height: 1000px; /* Large enough for content */
+            padding-bottom: 1.5rem;
+            border-top: 1px solid var(--border-color-dark);
+        }
+        .accordion-header .accordion-icon {
+            transition: transform 0.3s ease-in-out;
+        }
+        .accordion-item.open .accordion-header .accordion-icon {
+            transform: rotate(180deg);
+        }
+        .calc-result {
+            background-color: #0A0A0A;
+            border: 1px solid var(--border-color-dark);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-top: 1rem;
+            text-align: center;
+        }
+        .calc-result p {
+            margin: 0;
+        }
+        .calc-result .value {
+            font-size: 1.875rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+        .calc-result .label {
+            font-size: 0.875rem;
+            color: var(--text-secondary-dark);
+            text-transform: uppercase;
+        }
+
+        /* Profile Modal Styles */
+        #profile-modal .modal-content {
+            height: 100%;
+            width: 100%;
+            max-width: 450px;
+            margin-left: auto;
+            border-radius: 0;
+            animation: slideInFromRight 0.3s ease-out;
+        }
+        @keyframes slideInFromRight {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+        .profile-section-title {
+            color: var(--text-secondary-dark);
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.75rem;
+        }
+        .info-link {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            background-color: var(--card-bg-dark);
+            border-radius: 0.5rem;
+            transition: background-color 0.2s;
+        }
+        .info-link:hover {
+            background-color: var(--border-color-dark);
+        }
+        
+        /* Scroll Indicator */
+        #scroll-indicator {
+            animation: bounce 2s infinite;
+        }
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-20px);
+            }
+            60% {
+                transform: translateY(-10px);
+            }
+        }
+        
+        /* Pop-up Notification */
+        #popup-notification {
+            transition: opacity 0.3s, transform 0.3s;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+    <div id="loading-spinner" class="fixed inset-0 bg-black z-50 flex items-center justify-center">
+        <div class="animate-spin rounded-full h-24 w-24 border-t-4 border-b-4" style="border-color: var(--primary);"></div>
+    </div>
+
+    <div id="dashboard-container" class="hidden flex min-h-screen">
+        <aside class="w-64 flex-shrink-0 p-6 flex-col hidden md:flex card border-r border-t-0 border-b-0 border-l-0">
+            <div class="flex-grow">
+                <div class="flex items-center gap-3 mb-10">
+                    <div class="bg-primary text-text-on-primary rounded-lg h-10 w-10 flex items-center justify-center"><i data-lucide="bar-chart-3"></i></div>
+                    <h1 class="text-2xl font-bold text-main">Health Hub</h1>
+                </div>
+                <nav id="main-nav-desktop" class="flex flex-col gap-2">
+                    <a href="#" class="nav-item active" data-section="dashboard"><i data-lucide="layout-dashboard"></i><span>Dashboard</span></a>
+                    <a href="#" class="nav-item" data-section="food"><i data-lucide="utensils-crossed"></i><span>Food Planner</span></a>
+                    <a href="#" class="nav-item" data-section="tools"><i data-lucide="wrench"></i><span>Tools</span></a>
+                    <a href="#" class="nav-item" data-section="calculator"><i data-lucide="calculator"></i><span>Calculator</span></a>
+                </nav>
+            </div>
+            <div class="sticky bottom-6">
+                <button id="log-food-btn-desktop" class="btn-primary w-full justify-center">
+                    <i data-lucide="plus" class="mr-2"></i>
+                    <span>Log Food</span>
+                </button>
+            </div>
+        </aside>
+
+        <div class="flex-1 flex flex-col">
+            <header class="sticky top-0 z-40 header-glass">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="flex items-center justify-between h-20">
+                        <h1 id="header-title" class="text-3xl font-bold text-main hidden md:block">Dashboard</h1>
+                         <div class="flex items-center gap-3 md:hidden">
+                            <div class="bg-primary text-text-on-primary rounded-lg h-10 w-10 flex items-center justify-center"><i data-lucide="bar-chart-3"></i></div>
+                            <h1 class="text-xl font-bold text-main">Health Hub</h1>
+                        </div>
+
+                        <div class="flex items-center gap-4">
+                            <button id="calendar-button" class="relative flex items-center justify-center p-2 rounded-full cursor-pointer text-primary hover:bg-zinc-800 transition-colors">
+                                <i data-lucide="calendar" class="w-6 h-6"></i>
+                                <span id="date-display" class="hidden"></span> <!-- Span is hidden but kept for JS compatibility -->
+                            </button>
+                            <div class="relative">
+                                <button id="profile-button" class="flex items-center space-x-2">
+                                    <i id="premium-nav-icon" data-lucide="crown" class="w-5 h-5 text-primary hidden"></i>
+                                    <span id="profile-welcome" class="font-semibold text-sub hidden sm:inline">Welcome!</span>
+                                    <div id="user-avatar" class="w-10 h-10 rounded-full bg-primary text-text-on-primary flex items-center justify-center text-xl font-bold border-2 border-primary-hover"></div>
+                                </button>
+                                <!-- Dropdown removed, will be replaced by modal -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <main class="flex-grow p-4 sm:p-6 lg:p-8 pb-28 md:pb-8">
+                <div class="max-w-7xl mx-auto">
+                    <div id="dashboard-section" class="section-content active">
+                        <div class="flex justify-between items-start mb-8">
+                            <div>
+                                <h2 id="main-welcome-message" class="text-3xl md:text-4xl font-bold text-main">Welcome back!</h2>
+                                <p class="text-sub mt-1">"The only bad workout is the one that didn't happen."</p>
+                            </div>
+                            <div class="text-right flex-shrink-0 ml-4 hidden sm:block">
+                                 <p class="text-sub font-semibold">Today's Goal</p>
+                                 <p id="today-goal-highlight" class="text-5xl font-bold" style="color: var(--primary);">0 Kcal</p>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                            <div id="consumed-calories-card" class="card p-4 flex flex-col gap-2 card-clickable"><div class="flex items-center gap-2 text-sub"><i data-lucide="utensils" class="w-5 h-5 text-blue-400"></i><h3 class="font-semibold">Consumed</h3></div><p id="consumed-calories-summary" class="summary-card-value text-2xl lg:text-3xl font-bold text-main">0 kcal</p></div>
+                            <div class="card p-4 flex flex-col gap-2"><div class="flex items-center gap-2 text-sub"><i data-lucide="target" class="w-5 h-5 text-yellow-400"></i><h3 class="font-semibold">Goal</h3></div><p id="goal-calories-summary" class="summary-card-value text-2xl lg:text-3xl font-bold text-main">0 kcal</p></div>
+                            <div class="card p-4 flex flex-col gap-2"><div class="flex items-center gap-2 text-sub"><i data-lucide="flame" class="w-5 h-5 text-red-400"></i><h3 class="font-semibold">Burned</h3></div><p id="burned-calories-summary" class="summary-card-value text-2xl lg:text-3xl font-bold text-main">0 kcal</p></div>
+                            <div id="net-calories-card" class="card p-4 flex flex-col gap-2"><div class="flex items-center gap-2 text-sub"><i data-lucide="bar-chart-horizontal" class="w-5 h-5 text-green-400"></i><h3 class="font-semibold">Net</h3></div><p id="net-calories-summary" class="summary-card-value text-2xl lg:text-3xl font-bold text-main">0 kcal</p></div>
+                        </div>
+                        <!-- Today's Goal Progress Card -->
+                        <div class="card p-6 mb-6">
+                            <div id="progress-container">
+                                <div class="flex justify-between items-center mb-2">
+                                    <h3 class="font-bold text-xl">Today's Goal Progress</h3>
+                                    <p id="calorie-summary-text" class="font-semibold text-sub">0 / 2000 kcal</p>
+                                </div>
+                                <div class="progress-bar-bg h-3 rounded-full">
+                                    <div id="calorie-progress-bar" class="progress-bar-fill" style="width: 0%;"></div>
+                                </div>
+                                <div class="flex justify-between items-center mt-2 text-sm text-sub">
+                                    <span id="calorie-progress-percentage">0%</span>
+                                    <span>100%</span>
+                                </div>
+                            </div>
+                            <div id="goal-completed-container" class="hidden text-center py-2">
+                                <h4 class="text-lg font-bold text-primary animate-pulse">Today's Calorie Goal Completed!</h4>
+                                <p class="text-sub text-sm mt-1">Stop eating now.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="card p-6 mb-6"><h3 class="font-bold text-xl mb-4">Log Burned Calories</h3><div class="flex items-center space-x-4"><input type="number" id="burned-calories-input" placeholder="Calories burned" class="w-full"><button id="log-burned-calories-btn" class="btn-primary">Log</button></div></div>
+                        
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                            <!-- Macros Breakdown Card -->
+                            <div id="macros-card" class="card p-6 flex flex-col lg:col-span-1">
+                                <h3 class="font-bold text-xl mb-4 text-center">Macros Breakdown</h3>
+                                <div class="relative h-48 w-48 mx-auto">
+                                    <canvas id="macros-chart"></canvas>
+                                </div>
+                                <div id="macros-legend" class="mt-6 space-y-3">
+                                    <!-- Legend will be populated by JS -->
+                                </div>
+                            </div>
+                            <div class="card p-6 flex flex-col lg:col-span-2">
+                                <div class="flex justify-between items-start mb-2">
+                                    <div>
+                                        <h3 class="font-bold text-xl">Hydration</h3>
+                                        <p id="water-intake-summary" class="text-2xl font-bold text-blue-400">0.0 / 2.0 L</p>
+                                    </div>
+                                    <div class="relative">
+                                         <button id="add-glass-btn" class="p-2 rounded-full bg-border-color-dark hover:bg-primary/20"><i data-lucide="plus"></i></button>
+                                         <div id="splash-animation" class="splash"></div>
+                                    </div>
+                                </div>
+                                <div class="relative flex-grow h-52 w-full">
+                                    <div id="water-level-container" class="absolute bottom-0 left-0 w-full h-full rounded-lg overflow-hidden flex items-end">
+                                        <div id="water-level" class="w-full bg-blue-500/50 transition-all duration-500 ease-out" style="height: 0%;"></div>
+                                    </div>
+                                    <canvas id="water-chart" class="relative z-10"></canvas>
+                                </div>
+                                 <div class="flex items-center justify-center gap-6 mt-4">
+                                    <button id="remove-glass-btn" class="p-2 rounded-full bg-border-color-dark hover:bg-primary/20"><i data-lucide="minus"></i></button>
+                                    <div class="flex items-center gap-2 text-lg"><i data-lucide="glass-water"></i><span id="water-glass-count">0 glasses</span></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                            <div id="weight-card" class="card p-6">
+                                <div id="log-weight-container">
+                                    <h3 class="font-bold text-xl mb-4">Log Daily Weight</h3>
+                                    <div class="flex items-center space-x-4">
+                                        <input type="number" id="weight-input" placeholder="Weight in kg" class="w-full">
+                                        <button id="log-weight-btn" class="btn-primary">Log</button>
+                                    </div>
+                                </div>
+                                <div id="mini-weight-graph-container" class="hidden">
+                                    <h3 class="font-bold text-xl mb-4">This Month's Trend</h3>
+                                    <div class="relative h-24 w-full">
+                                        <canvas id="mini-weight-chart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="food-section" class="section-content card p-6">
+                        <h2 class="text-2xl font-bold text-main mb-4">Nutrition Lookup</h2>
+                        <div class="flex items-center space-x-4 mb-6">
+                            <input type="text" id="nutrition-search-input" placeholder="e.g., '1 apple'" class="w-full">
+                            <button id="nutrition-search-btn" class="btn-primary">Search</button>
+                        </div>
+                        <div id="nutrition-results" class="space-y-4"></div>
+                    </div>
+                    
+                    <div id="tools-section" class="section-content card p-6">
+                        <div class="border-b border-border-color-dark mb-4">
+                            <nav class="flex space-x-4" id="tools-tabs">
+                                <button class="tab-button active" data-tab="recipe-generator">Recipe Generator</button>
+                                <button class="tab-button" data-tab="cravings-solver">Cravings Solver</button>
+                            </nav>
+                        </div>
+
+                        <div id="recipe-generator-tab" class="tab-content active">
+                            <h3 class="text-xl font-bold text-main mb-4">Recipe Generator</h3>
+                            <div class="space-y-4">
+                                <textarea id="recipe-ingredients-input" placeholder="Enter ingredients, separated by commas (e.g., chicken, rice, broccoli)" rows="3" class="w-full"></textarea>
+                                <div class="flex space-x-4">
+                                    <button id="find-recipes-btn" class="btn-primary">Find Recipes</button>
+                                    <button id="clear-recipes-btn" class="btn-secondary">Clear</button>
+                                </div>
+                                <div id="recipe-results" class="space-y-6 mt-4"></div>
+                            </div>
+                        </div>
+
+                        <div id="cravings-solver-tab" class="tab-content">
+                             <h3 class="text-xl font-bold text-main mb-4">Cravings Solver</h3>
+                            <div class="space-y-4">
+                                <input type="text" id="craving-input" placeholder="What are you craving? (e.g., chocolate cake)" class="w-full">
+                                <button id="solve-craving-btn" class="btn-primary">Find Healthy Alternatives</button>
+                                <div id="craving-results" class="mt-4"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="calculator-section" class="section-content">
+                        <div class="max-w-2xl mx-auto">
+                            <div class="text-center mb-8">
+                                <h2 class="text-3xl md:text-4xl font-bold text-main">Health Calculators</h2>
+                                <p class="text-sub mt-1">A suite of tools to help you track your health metrics.</p>
+                            </div>
+                            <div id="health-calculators-container" class="space-y-3">
+                                <!-- BMI Calculator -->
+                                <div class="accordion-item card overflow-hidden">
+                                    <div class="accordion-header">
+                                        <div class="flex items-center gap-3"><i data-lucide="ruler"></i><span>BMI</span></div>
+                                        <i data-lucide="chevron-down" class="accordion-icon"></i>
+                                    </div>
+                                    <div class="accordion-content">
+                                        <form id="bmi-form" class="space-y-4">
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <div><label for="bmi-weight" class="block text-sm font-medium text-sub mb-1">Weight (kg)</label><input type="number" id="bmi-weight" class="w-full" required></div>
+                                                <div><label for="bmi-height" class="block text-sm font-medium text-sub mb-1">Height (cm)</label><input type="number" id="bmi-height" class="w-full" required></div>
+                                            </div>
+                                            <button type="submit" class="btn-primary w-full">Calculate BMI</button>
+                                            <div id="bmi-result" class="calc-result hidden"></div>
+                                        </form>
+                                    </div>
+                                </div>
+
+                                <!-- BMR Calculator -->
+                                <div class="accordion-item card overflow-hidden">
+                                    <div class="accordion-header">
+                                        <div class="flex items-center gap-3"><i data-lucide="flame"></i><span>BMR</span></div>
+                                        <i data-lucide="chevron-down" class="accordion-icon"></i>
+                                    </div>
+                                    <div class="accordion-content">
+                                        <form id="bmr-form" class="space-y-4">
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <div><label for="bmr-weight" class="block text-sm font-medium text-sub mb-1">Weight (kg)</label><input type="number" id="bmr-weight" class="w-full" required></div>
+                                                <div><label for="bmr-height" class="block text-sm font-medium text-sub mb-1">Height (cm)</label><input type="number" id="bmr-height" class="w-full" required></div>
+                                                <div><label for="bmr-age" class="block text-sm font-medium text-sub mb-1">Age</label><input type="number" id="bmr-age" class="w-full" required></div>
+                                                <div><label for="bmr-gender" class="block text-sm font-medium text-sub mb-1">Gender</label><select id="bmr-gender" class="w-full"><option value="male">Male</option><option value="female">Female</option></select></div>
+                                            </div>
+                                            <button type="submit" class="btn-primary w-full">Calculate BMR</button>
+                                            <div id="bmr-result" class="calc-result hidden"></div>
+                                        </form>
+                                    </div>
+                                </div>
+                                
+                                <!-- Body Fat Calculator -->
+                                <div class="accordion-item card overflow-hidden">
+                                    <div class="accordion-header">
+                                        <div class="flex items-center gap-3"><i data-lucide="percent"></i><span>Body Fat</span></div>
+                                        <i data-lucide="chevron-down" class="accordion-icon"></i>
+                                    </div>
+                                    <div class="accordion-content">
+                                        <form id="bodyfat-form" class="space-y-4">
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <div><label for="bf-gender" class="block text-sm font-medium text-sub mb-1">Gender</label><select id="bf-gender" class="w-full"><option value="male">Male</option><option value="female">Female</option></select></div>
+                                                <div><label for="bf-height" class="block text-sm font-medium text-sub mb-1">Height (cm)</label><input type="number" id="bf-height" class="w-full" required></div>
+                                                <div><label for="bf-waist" class="block text-sm font-medium text-sub mb-1">Waist (cm)</label><input type="number" id="bf-waist" class="w-full" required></div>
+                                                <div><label for="bf-neck" class="block text-sm font-medium text-sub mb-1">Neck (cm)</label><input type="number" id="bf-neck" class="w-full" required></div>
+                                                <div id="bf-hip-container" class="hidden"><label for="bf-hip" class="block text-sm font-medium text-sub mb-1">Hip (cm)</label><input type="number" id="bf-hip" class="w-full"></div>
+                                            </div>
+                                            <button type="submit" class="btn-primary w-full">Calculate Body Fat</button>
+                                            <div id="bodyfat-result" class="calc-result hidden"></div>
+                                        </form>
+                                    </div>
+                                </div>
+
+                                <!-- Maintenance Calorie Calculator -->
+                                <div class="accordion-item card overflow-hidden">
+                                    <div class="accordion-header">
+                                        <div class="flex items-center gap-3"><i data-lucide="activity"></i><span>Maintenance Calories</span></div>
+                                        <i data-lucide="chevron-down" class="accordion-icon"></i>
+                                    </div>
+                                    <div class="accordion-content">
+                                        <p class="text-sub text-sm mb-4">First, calculate your BMR, then use that value here.</p>
+                                        <form id="maint-cals-form" class="space-y-4">
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <div><label for="mc-bmr" class="block text-sm font-medium text-sub mb-1">Your BMR</label><input type="number" id="mc-bmr" class="w-full" required placeholder="From BMR calculator"></div>
+                                                <div>
+                                                    <label for="mc-activity" class="block text-sm font-medium text-sub mb-1">Activity Level</label>
+                                                    <select id="mc-activity" class="w-full">
+                                                        <option value="1.2">Sedentary</option>
+                                                        <option value="1.375">Lightly Active</option>
+                                                        <option value="1.55">Moderately Active</option>
+                                                        <option value="1.725">Very Active</option>
+                                                        <option value="1.9">Extra Active</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <button type="submit" class="btn-primary w-full">Calculate Calories</button>
+                                            <div id="maint-cals-result" class="calc-result hidden"></div>
+                                        </form>
+                                    </div>
+                                </div>
+
+                                <!-- Protein Intake Calculator -->
+                                <div class="accordion-item card overflow-hidden">
+                                    <div class="accordion-header">
+                                        <div class="flex items-center gap-3"><i data-lucide="beef"></i><span>Protein Intake</span></div>
+                                        <i data-lucide="chevron-down" class="accordion-icon"></i>
+                                    </div>
+                                    <div class="accordion-content">
+                                        <form id="protein-form" class="space-y-4">
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <div><label for="protein-weight" class="block text-sm font-medium text-sub mb-1">Weight (kg)</label><input type="number" id="protein-weight" class="w-full" required></div>
+                                                <div>
+                                                    <label for="protein-goal" class="block text-sm font-medium text-sub mb-1">Goal</label>
+                                                    <select id="protein-goal" class="w-full">
+                                                        <option value="0.8">Maintenance (Sedentary)</option>
+                                                        <option value="1.4">Maintenance (Active)</option>
+                                                        <option value="1.8">Muscle Gain</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <button type="submit" class="btn-primary w-full">Calculate Protein</button>
+                                            <div id="protein-result" class="calc-result hidden"></div>
+                                        </form>
+                                    </div>
+                                </div>
+
+                                <!-- Period & Ovulation Calculator -->
+                                <div class="accordion-item card overflow-hidden">
+                                    <div class="accordion-header">
+                                        <div class="flex items-center gap-3"><i data-lucide="calendar-heart"></i><span>Period & Ovulation</span></div>
+                                        <i data-lucide="chevron-down" class="accordion-icon"></i>
+                                    </div>
+                                    <div class="accordion-content">
+                                        <form id="period-form" class="space-y-4">
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <div><label for="period-last-date" class="block text-sm font-medium text-sub mb-1">Last Period Start Date</label><input type="date" id="period-last-date" class="w-full" required></div>
+                                                <div><label for="period-cycle-length" class="block text-sm font-medium text-sub mb-1">Avg. Cycle Length (days)</label><input type="number" id="period-cycle-length" class="w-full" value="28" required></div>
+                                            </div>
+                                            <button type="submit" class="btn-primary w-full">Calculate Cycle</button>
+                                            <div id="period-result" class="calc-result hidden"></div>
+                                        </form>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="scroll-indicator" class="hidden fixed bottom-28 left-1/2 -translate-x-1/2 z-20 text-primary">
+                    <i data-lucide="chevron-down" class="w-10 h-10"></i>
+                </div>
+            </main>
+        </div>
+    </div>
+    
+    <footer class="fixed bottom-0 left-0 right-0 md:hidden z-10 p-4">
+        <!-- Flexbox layout for the main bar -->
+        <div class="card max-w-md mx-auto rounded-full shadow-lg border-0 flex justify-around items-center h-16" style="background-color: #1C1C1E;">
+            <a href="#" class="nav-item-mobile active flex flex-col items-center justify-center gap-1 flex-1" data-section="dashboard"><i data-lucide="layout-grid"></i><span class="text-xs">Home</span></a>
+            <a href="#" class="nav-item-mobile flex flex-col items-center justify-center gap-1 flex-1" data-section="food"><i data-lucide="utensils-crossed"></i><span class="text-xs">Food</span></a>
+            
+            <!-- Button is a flex item, positioned relatively to be raised up -->
+            <div class="flex-shrink-0">
+                <button id="log-food-btn-mobile" class="relative z-20 text-black rounded-full h-16 w-16 flex items-center justify-center shadow-lg" style="top: -1rem; background-color: var(--primary); box-shadow: 0 0 20px 5px rgba(250, 204, 21, 0.4);">
+                    <i data-lucide="plus" class="h-8 w-8" stroke-width="3"></i>
+                </button>
+            </div>
+            
+            <a href="#" class="nav-item-mobile flex flex-col items-center justify-center gap-1 flex-1" data-section="tools"><i data-lucide="wrench"></i><span class="text-xs">Tools</span></a>
+            <a href="#" class="nav-item-mobile flex flex-col items-center justify-center gap-1 flex-1" data-section="calculator"><i data-lucide="calculator"></i><span class="text-xs">Calculator</span></a>
+        </div>
+    </footer>
+
+
+    <!-- Modals -->
+    <div id="profile-modal" class="fixed inset-0 z-50 flex justify-end modal-backdrop hidden">
+        <div class="modal-content card bg-background-dark p-6 sm:p-8 flex flex-col overflow-y-auto">
+            <!-- Header -->
+            <div class="flex justify-between items-center mb-8 flex-shrink-0">
+                <h2 class="text-2xl font-bold text-main">Profile & Settings</h2>
+                <button id="close-profile-modal-btn" class="text-sub hover:text-main text-3xl">&times;</button>
+            </div>
+
+            <!-- Profile Info -->
+            <div class="text-center mb-8 flex-shrink-0">
+                <div class="relative inline-block">
+                    <div id="profile-modal-avatar" class="w-24 h-24 rounded-full bg-primary text-text-on-primary flex items-center justify-center text-4xl font-bold border-4 border-primary-hover mx-auto"></div>
+                    <div id="profile-crown-icon" class="absolute -top-2 -right-2 bg-background-dark p-1 rounded-full hidden">
+                         <i data-lucide="crown" class="w-6 h-6 text-primary"></i>
+                    </div>
+                </div>
+                <div class="flex items-center justify-center mt-4">
+                    <h3 id="profile-modal-name" class="text-2xl font-bold"></h3>
+                    <button id="edit-name-btn" class="ml-2 text-sub hover:text-primary"><i data-lucide="pencil" class="w-5 h-5"></i></button>
+                </div>
+                <p class="text-sub mt-1">Welcome to your health hub!</p>
+            </div>
+
+            <div class="flex-grow">
+                <div class="space-y-8">
+                    <!-- Preferences Section -->
+                     <div class="space-y-2">
+                        <h4 class="profile-section-title">Preferences</h4>
+                        <button type="button" id="preferences-btn" class="info-link w-full">
+                            <span>Your Preferences</span>
+                            <i data-lucide="chevron-right" class="w-5 h-5 text-sub"></i>
+                        </button>
+                        <div id="preferences-inputs" class="hidden space-y-4 pt-4">
+                            <form id="settings-form">
+                                <div><label for="name-input" class="block text-sm font-medium text-sub mb-1">Your Name</label><input type="text" id="name-input" required class="w-full"></div>
+                                <div><label for="calorie-goal-input" class="block text-sm font-medium text-sub mb-1">Daily Calorie Goal (kcal)</label><input type="number" id="calorie-goal-input" required class="w-full"></div>
+                                <div><label for="water-goal-input" class="block text-sm font-medium text-sub mb-1">Daily Water Goal (Liters)</label><input type="number" step="0.1" id="water-goal-input" required class="w-full"></div>
+                                <div><label for="glass-size-input" class="block text-sm font-medium text-sub mb-1">Default Glass Size (ml)</label><input type="number" id="glass-size-input" required class="w-full"></div>
+                                <button type="submit" id="save-changes-btn" class="w-full mt-2 btn-primary">Save Changes</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Account Actions -->
+                    <div class="space-y-2">
+                        <h4 class="profile-section-title">Account</h4>
+                        <button type="button" id="premium-btn" class="info-link w-full">
+                             <div class="flex items-center gap-3"><i data-lucide="gem" class="text-primary"></i><span>Premium Status</span></div>
+                            <i data-lucide="chevron-right" class="w-5 h-5 text-sub"></i>
+                        </button>
+                        <div id="premium-details" class="hidden space-y-4 pt-4 border-t border-zinc-700 mt-2">
+                            <div class="text-center p-4 rounded-lg bg-zinc-800">
+                                <p class="font-semibold">Current Plan: <span id="premium-plan-name" class="text-primary">Power Surge</span></p>
+                                <p class="text-sm text-sub">Expires on: <span id="premium-expiry-date">Jan 25, 2026</span></p>
+                            </div>
+                            <button type="button" class="w-full btn-primary">Renew Plan</button>
+                        </div>
+                        <button id="reset-password-btn" class="info-link w-full">
+                            <div class="flex items-center gap-3"><i data-lucide="key-round"></i><span>Change Password</span></div>
+                        </button>
+                        <button id="logout-btn" class="info-link w-full">
+                            <div class="flex items-center gap-3"><i data-lucide="log-out"></i><span>Logout</span></div>
+                        </button>
+                    </div>
+
+                    <!-- Informational Pages -->
+                    <div class="space-y-2">
+                        <h4 class="profile-section-title">Information</h4>
+                        <a href="about.html" class="info-link"><span>About Us</span><i data-lucide="chevron-right" class="w-5 h-5 text-sub"></i></a>
+                        <a href="contact.html" class="info-link"><span>Contact Us</span><i data-lucide="chevron-right" class="w-5 h-5 text-sub"></i></a>
+                        <a href="faq.html" class="info-link"><span>FAQ</span><i data-lucide="chevron-right" class="w-5 h-5 text-sub"></i></a>
+                        <a href="terms.html" class="info-link"><span>Terms and Conditions</span><i data-lucide="chevron-right" class="w-5 h-5 text-sub"></i></a>
+                        <a href="privacy.html" class="info-link"><span>Privacy Policy</span><i data-lucide="chevron-right" class="w-5 h-5 text-sub"></i></a>
+                        <a href="refund.html" class="info-link"><span>Payments and Refund Policy</span><i data-lucide="chevron-right" class="w-5 h-5 text-sub"></i></a>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- Footer -->
+            <footer class="mt-8 text-center text-sm text-sub flex-shrink-0">
+                <p>Made with ❤️ by Ashutosh Roy</p>
+            </footer>
+        </div>
+    </div>
+    <div id="food-log-modal" class="fixed inset-0 z-50 flex items-center justify-center modal-backdrop hidden"><div class="card p-8 rounded-xl shadow-2xl m-4 w-full max-w-lg"><div class="flex justify-between items-center mb-6"><h2 class="text-2xl font-bold text-main">Food Log Details</h2><button id="close-food-log-modal-btn" class="text-sub hover:text-main text-3xl">&times;</button></div><div id="food-log-modal-list" class="space-y-2 max-h-96 overflow-y-auto"></div></div></div>
+    <div id="food-logging-modal" class="fixed inset-0 z-50 flex items-center justify-center modal-backdrop hidden">
+        <div class="card p-8 rounded-xl shadow-2xl m-4 w-full max-w-lg">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-main">Log Food Item</h2>
+                <button id="close-food-logging-modal-btn" class="text-sub hover:text-main text-3xl">&times;</button>
+            </div>
+            <form id="food-log-form" class="space-y-4">
+                <div>
+                    <label for="food-item-input" class="block text-sm font-medium text-sub">Food Item</label>
+                    <input type="text" id="food-item-input" placeholder="e.g., '1 cup of cooked rice'" required class="mt-1 w-full">
+                </div>
+                <div>
+                    <label for="meal-type-select" class="block text-sm font-medium text-sub">Meal</label>
+                    <select id="meal-type-select" class="mt-1 w-full">
+                        <option>Breakfast</option>
+                        <option>Lunch</option>
+                        <option>Dinner</option>
+                        <option>Snacks</option>
+                    </select>
+                </div>
+                <button type="submit" id="log-food-btn" class="btn-primary w-full h-11">Analyze & Log</button>
+            </form>
+            <div id="food-log-error" class="hidden mt-4 p-3 rounded-lg bg-red-900/50 text-red-300 text-sm"></div>
+        </div>
+    </div>
+    <div id="weight-history-modal" class="fixed inset-0 z-50 flex items-center justify-center modal-backdrop hidden">
+        <div class="card p-8 rounded-xl shadow-2xl m-4 w-full max-w-lg">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-main">Weight History</h2>
+                <button id="close-weight-history-modal-btn" class="text-sub hover:text-main text-3xl">&times;</button>
+            </div>
+            <div class="relative h-96 w-full">
+                <canvas id="weight-history-chart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div id="calendar-modal" class="fixed inset-0 z-50 flex items-center justify-center modal-backdrop hidden">
+        <div class="card p-6 rounded-xl shadow-2xl m-4 w-full max-w-sm">
+            <div class="flex justify-between items-center mb-4">
+                <button id="prev-month-btn" class="p-2 rounded-full hover:bg-border-color-dark"><i data-lucide="chevron-left"></i></button>
+                <h2 id="month-year-display" class="font-bold text-lg"></h2>
+                <button id="next-month-btn" class="p-2 rounded-full hover:bg-border-color-dark"><i data-lucide="chevron-right"></i></button>
+            </div>
+            <div class="grid grid-cols-7 gap-1 text-center text-sub text-sm mb-2">
+                <div>Su</div><div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div>
+            </div>
+            <div id="calendar-grid" class="grid grid-cols-7 gap-1 text-center"></div>
+        </div>
+    </div>
+    
+    <div id="popup-notification" class="fixed top-8 left-1/2 -translate-x-1/2 p-4 rounded-lg text-white shadow-lg opacity-0 -translate-y-4 pointer-events-none">
+        <p></p>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot, increment, arrayUnion, updateDoc, getDocs, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        const firebaseConfig = {
+            apiKey: "AIzaSyAS1fvvgtRXx9wLwmJec-2tkBX2PlnAuN0",
+            authDomain: "calversev2.firebaseapp.com",
+            projectId: "calversev2",
+            storageBucket: "calversev2.appspot.com",
+            messagingSenderId: "794294005093",
+            appId: "1:794294005093:web:6104521d5e4a2de812858c",
+        };
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        window.firebaseInstances = { auth, db, onAuthStateChanged, signOut, sendPasswordResetEmail, doc, setDoc, onSnapshot, increment, arrayUnion, updateDoc, getDocs, collection };
+    </script>
+    
+    <script type="module" src="./dashboard.js"></script>
+    <script type="module" src="./food.js"></script>
+    <script type="module" src="./calculator.js"></script>
+    <script type="module">
+        // This script handles basic navigation and icon setup that is tightly coupled with the HTML.
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons(); 
+
+            const navLinksDesktop = document.querySelectorAll('#main-nav-desktop .nav-item');
+            const navLinksMobile = document.querySelectorAll('footer .nav-item-mobile');
+            const sections = document.querySelectorAll('.section-content');
+            const headerTitle = document.getElementById('header-title');
+            
+            const setActiveNav = (sectionId) => {
+                 navLinksDesktop.forEach(link => {
+                    link.classList.toggle('active', link.dataset.section === sectionId);
+                });
+                navLinksMobile.forEach(link => {
+                    link.classList.toggle('active', link.dataset.section === sectionId);
+                });
+
+                sections.forEach(content => {
+                    content.classList.toggle('active', content.id === `${sectionId}-section`);
+                });
+
+                if (headerTitle) {
+                    const activeLink = document.querySelector(`.nav-item[data-section="${sectionId}"] span`);
+                    headerTitle.textContent = activeLink ? activeLink.textContent : 'Dashboard';
+                }
+            };
+
+            const allNavLinks = [...navLinksDesktop, ...navLinksMobile];
+            allNavLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const sectionId = e.currentTarget.dataset.section;
+                    if (sectionId) {
+                       setActiveNav(sectionId);
+                    }
+                });
+            });
+
+            // Handle section renaming from old version to new version for compatibility
+            const oldMealsSection = document.getElementById('meals-section');
+            if (oldMealsSection) {
+                oldMealsSection.id = 'food-section';
+                document.querySelector('[data-section="meals"]')?.setAttribute('data-section', 'food');
+            }
+             const oldRecipesSection = document.getElementById('recipes-section');
+            if (oldRecipesSection) {
+                oldRecipesSection.id = 'settings-section';
+                 document.querySelector('[data-section="recipes"]')?.setAttribute('data-section', 'settings');
+            }
+        });
+    </script>
+</body>
+</html>
